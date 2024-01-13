@@ -9,9 +9,10 @@ import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -29,7 +30,7 @@ public class Robot extends TimedRobot {
   private final boolean inv = true;
   private TalonFX leftShooter;
   private TalonFX rightShooter;
-  private final CommandXboxController driverJoystick = new CommandXboxController(0);
+  private final XboxController driverJoystick = new XboxController(0);
   double maxSpeed = 8;
 
   private boolean setMode = true;
@@ -62,21 +63,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
 
-    double curJoystick = driverJoystick.getRawAxis(0);
-    double curSpeed = curJoystick * maxSpeed;
-
-    if(setMode) {
-      curSpeed = SmartDashboard.getNumber("goalSpeed", curSpeed);
-    }
-
-    leftShooter.setVoltage(curSpeed);
-    rightShooter.setVoltage(curSpeed);
-
-    StatusSignal rpm = leftShooter.getVelocity();
-
-    SmartDashboard.putNumber("Motor Speed", rpm.getValueAsDouble());
-    SmartDashboard.putNumber("Joystick Input", curJoystick);
-    SmartDashboard.putNumber("Cur Speed", curSpeed);
 
   }
 
@@ -113,11 +99,57 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+  }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+
+    double curJoystick = driverJoystick.getRawAxis(0);
+
+    boolean a = driverJoystick.getAButton();
+    boolean b = driverJoystick.getBButton();
+    boolean x = driverJoystick.getXButton();
+    boolean y = driverJoystick.getYButton();
+    boolean bumper = driverJoystick.getLeftBumper();
+
+    if(a) {
+      maxSpeed = 4;
+    }
+
+    if(b) {
+      maxSpeed = 6;
+    }
+
+    if(x) {
+      maxSpeed = 8;
+    }
+
+    if(bumper) {
+      maxSpeed = 11;
+    }
+
+    if(y) {
+      maxSpeed = 0;
+    }
+
+
+    double curSpeed = curJoystick * maxSpeed;
+
+    if(setMode) {
+      curSpeed = SmartDashboard.getNumber("goalSpeed", curSpeed);
+    }
+
+    leftShooter.setVoltage(maxSpeed);
+    rightShooter.setVoltage(maxSpeed);
+
+    StatusSignal rpm = leftShooter.getVelocity();
+
+    SmartDashboard.putNumber("Motor Speed", rpm.getValueAsDouble());
+    SmartDashboard.putNumber("Joystick Input", curJoystick);
+    SmartDashboard.putNumber("Cur Speed", maxSpeed);
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
